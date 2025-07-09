@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Classroom</title>
+  <script type="module" src="newClass.js" defer></script>
+  <link rel="stylesheet" href="class.css" />
+</head>
+<body>
+  <header class="class-header">
+    <div class="logo">VirtualClass</div>
+    <div class="header-actions">
+      <button id="leaveBtn">Leave Class</button>
+    </div>
+  </header>
+
+  <main class="classroom-container">
+    <aside class="sidebar">
+      <button class="tab-button active" data-tab="video">Video</button>
+      <button class="tab-button" data-tab="whiteboard">Whiteboard</button>
+      <button class="tab-button" data-tab="chat">Chat</button>
+      <button class="tab-button" data-tab="documents">Documents</button>
+    </aside>
+
+    <section class="main-content">
+      <!-- Video Section -->
+      <section id="video" class="tab-content active video-panel">
+        <div class="video-box">
+          <h2>You</h2>
+          <video id="localVideo" autoplay muted playsinline></video>
+        </div>
+
+        <div id="remoteVideos" class="remote-video-grid">
+          <!-- Remote peers’ videos will appear here -->
+        </div>
+
+        <div class="video-controls">
+          <button id="toggleMic" title="Toggle Microphone">Mute</button>
+          <button id="toggleCamera" title="Toggle Camera">Camera</button>
+          <button id="screenShareBtn" title="Share Screen">Screen Share</button>
+        </div>
+      </section>
+
+      <!-- Whiteboard Section -->
+      <section id="whiteboard" class="tab-content">
+        <div class="whiteboard-container">
+          <p>Whiteboard feature coming soon...</p>
+        </div>
+      </section>
+
+      <!-- Chat Section -->
+      <section id="chat" class="tab-content">
+        <div class="chat-container">
+          <div class="chat-messages" id="chatMessages"></div>
+          <form id="chatForm" class="chat-input">
+            <input type="text" id="chatInput" placeholder="Type a message..." required />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Documents Section -->
+      <section id="documents" class="tab-content">
+        <div class="document-container">
+          <p>Document sharing feature coming soon...</p>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
