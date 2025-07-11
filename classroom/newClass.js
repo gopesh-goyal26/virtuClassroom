@@ -35,9 +35,9 @@ async function joinRoom(userId) {
 async function createConnection(userId) {
     const peerList = query(collection(db, 'rooms', roomId, 'peers'));
     onSnapshot(peerList, snap => {        
-        snap.docChanges().forEach(async change => {          
-            if (change.doc.id !== userId && change.type === "added") {
-                const connectionRef = doc(db, 'rooms', roomId, 'connections', `${userId.localeCompare(change.doc.id) <= 0 ? `${userId}-${change.doc.id}` : `${change.doc.id}-${userId}`}`);
+        snap.forEach(async peerDoc => {          
+            if (peerDoc.id !== userId) {
+                const connectionRef = doc(db, 'rooms', roomId, 'connections', `${userId.localeCompare(peerDoc.id) <= 0 ? `${userId}-${peerDoc.id}` : `${peerDoc.id}-${userId}`}`);
                 const connectionDoc = await getDoc(connectionRef);
                 if (!connectionDoc.exists()) {
                     await setDoc(connectionRef, {
@@ -46,7 +46,7 @@ async function createConnection(userId) {
                         candidates: {}
                     })
                 }                
-                webRTCFunctioning(userId, change.doc.id);
+                webRTCFunctioning(userId, peerDoc.id);
             }
         });
     })
@@ -60,15 +60,21 @@ async function webRTCFunctioning(userId, peerId) {
     const peerConnection = new RTCPeerConnection({
         iceServers: [
             { urls: "stun:stun.l.google.com:19302" },
-            { urls: "stun:stun.l.google.com:5349" },
-            { urls: "stun:stun1.l.google.com:3478" },
-            { urls: "stun:stun1.l.google.com:5349" },
-            { urls: "stun:stun2.l.google.com:19302" },
-            { urls: "stun:stun2.l.google.com:5349" },
-            { urls: "stun:stun3.l.google.com:3478" },
-            { urls: "stun:stun3.l.google.com:5349" },
-            { urls: "stun:stun4.l.google.com:19302" },
-            { urls: "stun:stun4.l.google.com:5349" }
+            {
+                urls: "turn:openrelay.metered.ca:80",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            },
+            {
+                urls: "turn:openrelay.metered.ca:443",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            },
+            {
+                urls: "turn:openrelay.metered.ca:443?transport=tcp",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            }
         ]
     });
     localStream.getTracks().forEach(track => {        
@@ -148,6 +154,7 @@ async function webRTCFunctioning(userId, peerId) {
     };
     const addedStreams = new Set();
     peerConnection.ontrack = event => {
+        console.log("ontrack fired", event);
         const remoteStream = event.streams[0];
         
         if(!addedStreams.has(remoteStream.id)){
@@ -155,9 +162,11 @@ async function webRTCFunctioning(userId, peerId) {
             video.srcObject = remoteStream;
             video.autoplay = true;
             video.playsInline = true;
-            console.log(video.srcObject);
-            
+            video.muted = true; // Ensure not muted
+            video.style.width = "320px"; // For visibility
+            video.style.height = "240px";
             remoteDiv.appendChild(video);
+            console.log("Appended remote video", video, remoteDiv);
             addedStreams.add(remoteStream.id)
         }
     }
